@@ -1,0 +1,7 @@
+__pycache__/
+*.py[cod]
+*.pyo
+.DS_Store
+Thumbs.db
+data/sample_files/x1_profile/
+data/sample_files/thunderbird.profile.tar.gz
