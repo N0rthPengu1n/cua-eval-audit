@@ -64,7 +64,7 @@
 
 ## 复现
 
-画像、统计和抽样只需要 Python 3 标准库。PPTX 评分回归使用单独的依赖。生成报告写入 `output/`。
+画像、统计和抽样只需要 Python 3 标准库。PPTX 和 XLSX 评分回归各有独立依赖。生成报告写入 `output/`。
 
 首次从头运行时，按以下顺序执行：
 
@@ -98,3 +98,18 @@ python -m unittest -v test_audit_regression
 X3 检查第 2 页的图片，X5 检查 6 页的图片顺序。两个任务的原评分函数均接受正确稿、错误稿和无损重编码稿；本地原型在原有检查之后比较各页图片解码后的 RGBA 像素，只拒绝错误稿。像素等价覆盖无损重编码这一对照，尚未校准有损压缩或色彩配置差异。测试范围是本地文件评分函数。
 
 离线重评分与逐项结果记录参考 [WebArena-Verified](https://github.com/ServiceNow/webarena-verified/blob/main/docs/index.md#part-1-evaluate-a-pre-run-task)。参考解重跑与失败断言参考 [Terminal-Bench Science 的评审流程](https://github.com/harbor-framework/terminal-bench-science/blob/main/REVIEWING.md)。
+
+### XLSX 评分回归
+
+在隔离的 Python 环境中运行以下命令。
+
+```bash
+python -m pip install -r requirements-xlsx-regression.txt
+python verify_xlsx_regression.py
+```
+
+任务 `26a8440e` 要求在 `Sheet2` 按月汇总销售额，未指定月份顺序。原版 `compare_table` 要求与金标逐行一致。回归对比官方正序稿、月份倒序稿和把一个月的合计改错的稿件。原版分数依次为 `1 / 0 / 0`，本地原型为 `1 / 1 / 0`。原型从源表独立计算每月合计，用月份匹配结果，并复用原版的源表保留检查。测试调用原评分函数并读取实际 XLSX 文件，范围为离线文件评分。 [逐项评分记录](output/xlsx_regression.json)
+
+### 试点复核
+
+试点含 6 道表格题及 6 道演示文稿题，记录了预期能力、验收条件、评分配置和复核问题。 [试点设计](output/pilot_design.md) · [空白复核表](output/pilot_review.csv) · [复核指南](output/pilot_review_guide.md)

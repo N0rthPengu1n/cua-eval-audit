@@ -14,3 +14,4 @@ bf4e9888-f10f-47af-8dba-76413038b73c,rejected,confirmed,artifact_replay,pptx_reg
 2fe4b718-3bd7-46ec-bdce-b184f5653624,rejected,unassessed,source_review,evaluator_evidence.md#x2,legacy_review,1,评分器按动画时间轴比较并容许帧拆分
 f9584479-3d0d-4c79-affa-9ad7afdd8850,rejected,unassessed,source_review,evaluator_evidence.md#section-4,legacy_review,1,原工作簿结构消解原有歧义
 88fe4b2d-3040-4c70-9a70-546a47764b48,rejected,unassessed,reference_label,annotation_sheet_round2.csv#row-27,legacy_review,1,范围与要求明确且允许多个结果
+26a8440e-c166-4c50-aef4-bfb77314b46b,confirmed,unassessed,artifact_replay,xlsx_regression.json,Codex,1,月份排序未限定且各月合计正确但原评分器拒绝倒序结果

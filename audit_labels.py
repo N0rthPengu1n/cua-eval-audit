@@ -26,9 +26,16 @@ def load_adjudications():
             raise ValueError(f"Missing evidence for {task_id}: {evidence}")
         if row["evidence_kind"] == "artifact_replay":
             replay = json.loads(evidence.read_text(encoding="utf-8"))["tasks"][task_id]["cases"]
-            wrong = replay["wrong_image_or_order"]
-            if (wrong["upstream_score"], wrong["repaired_score"]) != (1, 0):
-                raise ValueError(f"Evidence does not establish a false acceptance: {task_id}")
+            if row["b_status"] == "confirmed":
+                wrong = replay["wrong_image_or_order"]
+                if (wrong["upstream_score"], wrong["repaired_score"]) != (1, 0):
+                    raise ValueError(f"Evidence does not establish a false acceptance: {task_id}")
+            if row["a_status"] == "confirmed":
+                for case, scores in {"chronological": (1, 1), "reverse": (0, 1),
+                                     "incorrect_total": (0, 0)}.items():
+                    result = replay[case]
+                    if (result["upstream_score"], result["repaired_score"]) != scores:
+                        raise ValueError(f"Evidence does not establish a false rejection: {task_id} {case}")
         decisions[task_id] = row
     return decisions
 

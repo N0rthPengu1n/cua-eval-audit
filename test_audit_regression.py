@@ -34,6 +34,16 @@ class AuditRegressionTest(unittest.TestCase):
         self.assertIn("6", bins["FN"])
         self.assertIn("25", bins["TP"])
 
+    def test_monthly_sales_false_rejection_is_excluded(self):
+        task_id = "26a8440e-c166-4c50-aef4-bfb77314b46b"
+        decision = self.decisions[task_id]
+        self.assertEqual(decision["a_status"], "confirmed")
+        self.assertEqual(decision["evidence_kind"], "artifact_replay")
+        row = next(row for row in read_csv(PROFILE) if row["task_id"] == task_id)
+        pool, excluded = build_pool([row], {}, {task_id: decision})
+        self.assertEqual(pool, [])
+        self.assertIn(task_id, dict(excluded))
+
 
 if __name__ == "__main__":
     unittest.main()
