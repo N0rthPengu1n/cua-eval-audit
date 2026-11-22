@@ -1,0 +1,4 @@
+Bold the text on slide 1. Make the title of size 44pt and underline it on slide 1.
+
+Initial file: 39_2.pptx
+Save your result as result.pptx and return it with any available action log.

@@ -1,0 +1,4 @@
+Create a Pivot Table in a new sheet (Sheet2) to count how many times each "Invoice No." appears.
+
+Initial file: Invoices.xlsx
+Save your result as result.xlsx and return it with any available action log.

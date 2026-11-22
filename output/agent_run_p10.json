@@ -1,0 +1,59 @@
+{
+  "scope": "offline saved artifacts",
+  "run_kind": "agent",
+  "run_id": "cua-agent-4dc6d0a7610445289c727c5521164f0a",
+  "agent": "Codex CLI 0.171.0-alpha.13 (model identifier not recorded)",
+  "tasks": [
+    {
+      "case": "p3",
+      "task_id": "eb03d19a-b88d-4de4-8a64-ca0ac66f426b",
+      "artifact": "p3/result.xlsx",
+      "status": "missing_artifact",
+      "original_score": null,
+      "repaired_score": null
+    },
+    {
+      "case": "p6",
+      "task_id": "1954cced-e748-45c4-9c26-9855b97fbc5e",
+      "artifact": "p6/result.xlsx",
+      "status": "missing_artifact",
+      "original_score": null,
+      "repaired_score": null
+    },
+    {
+      "case": "p8",
+      "task_id": "5c1a6c3d-c1b3-47cb-9b01-8d1b7544ffa1",
+      "artifact": "p8/result.pptx",
+      "status": "missing_artifact",
+      "original_score": null,
+      "repaired_score": null
+    },
+    {
+      "case": "p9",
+      "task_id": "5cfb9197-e72b-454b-900e-c06b0c802b40",
+      "artifact": "p9/result.pptx",
+      "status": "missing_artifact",
+      "original_score": null,
+      "repaired_score": null
+    },
+    {
+      "case": "p10",
+      "task_id": "5d901039-a89c-4bfb-967b-bf66f4df075e",
+      "artifact": "p10/result.pptx",
+      "status": "scored",
+      "original_score": 1.0,
+      "repaired_score": 1,
+      "action_log_sha256": "1d2d2e67afbaf25ed1811f281478b0e90bb16e69bd70db5c86b2aac3eeb1fa39",
+      "artifact_sha256": "7e4804adc9574335aec88e0b5cb80200f8058d3d0525296efb7504a61a35e819",
+      "original_branches": [
+        1.0
+      ],
+      "image_geometry": {
+        "frame_ratio": 1.3333333333333333,
+        "visible_image_ratio": 1.3333217662244,
+        "relative_stretch": 8.675406962144194e-06,
+        "tolerance": 0.01
+      }
+    }
+  ]
+}
