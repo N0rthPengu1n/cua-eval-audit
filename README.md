@@ -23,15 +23,15 @@
    - **B：约束未被验收**——题目明确提出约束，但实际评分器没有对应检查。
 5. **审计子集**：按 11 个任务领域分层抽取 80 条可复现子集，供后续按领域和评分器分析。
 
-## 最终结果与解释边界
+## 当前结果与解释边界
 
-最终统计使用第二轮 30 条样本的裁决口径 D：
+第二轮 30 条样本按完整 `task_id` 关联 [裁决表](output/adjudications.csv)。X3、X5 均以原评分器的实测结果确认 B 类缺陷。
 
 | 指标 | 数值 |
 |---|---:|
-| TP / FP / FN / TN | 2 / 2 / 4 / 22 |
-| Precision / Recall | 0.500 / 0.333 |
-| Accuracy / Cohen's Kappa | 0.800 / 0.286 |
+| TP / FP / FN / TN | 3 / 1 / 4 / 22 |
+| Precision / Recall | 0.750 / 0.429 |
+| Accuracy / Cohen's Kappa | 0.833 / 0.453 |
 | 分层审计子集 | 80 条，11 个领域 |
 
 这里的 Precision、Recall、Accuracy 和 Kappa 都表示**自动规则与人机协作参考标签的一致度**，不代表规则准确率、真实缺陷率或评分者间信度。样本量较小，且采用分层抽样，因此不能据此估计整个 OSWorld 的缺陷比例。完整口径见 [标注来源与统计口径](output/LABEL_PROVENANCE.md)，判定标准见 [标注规范](annotation_guideline_v1.1.md)。
@@ -47,7 +47,8 @@
 | `step4_resample.py` / `step4_evaluate.py` | 第二轮零重叠抽样与独立复测 |
 | `step4_recompute.py` | 按最终裁决复算第二轮指标 |
 | `step4b_subset.py` | 构建 80 条、11 领域的审计子集 |
-| `verify_b_counterexample.py` | 构造 PPTX 反例，验证图片身份/顺序约束未被指定评分器检查 |
+| `verify_b_counterexample.py` | 构造 PPTX 反例并比较压缩包部件 |
+| `verify_pptx_regression.py` | 运行原评分函数与增加逐页图片像素校验的本地原型 |
 | `output/` | CSV 数据、审计报告、评分器证据和反例材料 |
 
 关键产物：
@@ -55,13 +56,15 @@
 - `output/task_profile.csv`：368 道任务的结构化画像；
 - `output/issues.csv`：第一版规则筛出的待复核任务；
 - `output/annotation_sheet*.csv`：两轮参考标签记录；
-- `output/round2_recomputed.md`：最终统计口径；
+- `output/adjudications.csv`：按 task ID 记录 A/B 状态、证据来源、复核者和修订号；
+- `output/round2_recomputed.md`：当前一致度统计与历史口径对照；
+- `output/pptx_regression.json`：评分参数、评分器与资产摘要、逐例分数；
 - `output/failure_taxonomy.md`：已确认问题与候选问题台账；
 - `output/subset_80.csv`：80 条领域分层审计子集。
 
 ## 复现
 
-环境只需要 Python 3 标准库。分析脚本不会修改 `data/osworld/` 中的上游任务；生成文件写入 `output/`。
+画像、统计和抽样只需要 Python 3 标准库。PPTX 评分回归使用单独的依赖。生成报告写入 `output/`。
 
 首次从头运行时，按以下顺序执行：
 
@@ -80,3 +83,18 @@ python verify_b_counterexample.py
 ```
 
 注意：`step2_sample.py` 和 `step4_resample.py` 会重新生成对应的标注表。若只想复查当前已完成的结果，请不要运行这两个抽样脚本；可直接运行 `step4_recompute.py`、`step4b_subset.py` 或查看 `output/` 中的已生成报告。
+
+### PPTX 评分回归
+
+在隔离的 Python 环境中安装 `python-pptx==1.0.2`，然后运行：
+
+```bash
+python verify_pptx_regression.py
+python step4_recompute.py
+python step4b_subset.py
+python -m unittest -v test_audit_regression
+```
+
+X3 检查第 2 页的图片，X5 检查 6 页的图片顺序。两个任务的原评分函数均接受正确稿、错误稿和无损重编码稿；本地原型在原有检查之后比较各页图片解码后的 RGBA 像素，只拒绝错误稿。像素等价覆盖无损重编码这一对照，尚未校准有损压缩或色彩配置差异。测试范围是本地文件评分函数。
+
+离线重评分与逐项结果记录参考 [WebArena-Verified](https://github.com/ServiceNow/webarena-verified/blob/main/docs/index.md#part-1-evaluate-a-pre-run-task)。参考解重跑与失败断言参考 [Terminal-Bench Science 的评审流程](https://github.com/harbor-framework/terminal-bench-science/blob/main/REVIEWING.md)。

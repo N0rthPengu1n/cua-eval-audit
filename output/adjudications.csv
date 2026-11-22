@@ -1,0 +1,16 @@
+task_id,a_status,b_status,evidence_kind,evidence,reviewer,revision,reason
+c7c1e4c3-9e92-4eba-a4b8-689953975ea4,confirmed,unassessed,source_review,evaluator_evidence.md#a1,legacy_review,1,邮箱字段只接受固定表格中的答案
+59155008-fe71-45ec-8a8f-dc35497b6aa8,confirmed,unassessed,source_review,evaluator_evidence.md#a2,legacy_review,1,相似名字多解但评分器指定一个页面
+3e3fc409-bff3-4905-bf16-c968eee3f807,confirmed,unassessed,source_review,evaluator_evidence.md#a3,legacy_review,1,IMDb 榜单时点与类别未限定但使用固定金标
+b5062e3e-641c-4e3a-907b-ac864d2e7652,confirmed,unassessed,source_review,evaluator_evidence.md#a4,legacy_review,1,首位作者可能有多个单位但评分器只认固定文本
+d1acdb87-bb67-4f30-84aa-990e56a09c92,confirmed,unassessed,source_review,evaluator_evidence.md#a5,legacy_review,1,餐馆可能有多个分店但评分器只认固定答案
+869de13e-bef9-4b91-ba51-f6708c40b096,confirmed,unassessed,source_review,evaluator_evidence.md#a6,legacy_review,1,分类边界未明确但评分器比对固定文件清单
+42f4d1c7-4521-4161-b646-0a8934e36081,unassessed,confirmed,source_review,evaluator_evidence.md#b1,legacy_review,1,评分器只检查扩展与图片尺寸
+c82632a4-56b6-4db4-9dd1-3820ee3388e4,rejected,confirmed,artifact_replay,pptx_regression.json,Codex,2,错误图片在原评分器得 1 分
+bf4e9888-f10f-47af-8dba-76413038b73c,rejected,confirmed,artifact_replay,pptx_regression.json,Codex,2,交换两页图片后在原评分器得 1 分
+46407397-a7d5-4c6b-92c6-dbe038b1457b,rejected,rejected,source_review,evaluator_evidence.md#x1,legacy_review,1,源文档顺序与金标一致且评分器检查命名
+15aece23-a215-4579-91b4-69eec72e18da,rejected,unassessed,source_review,evaluator_evidence.md#x4,legacy_review,1,评分器只检查标题纵向位置
+185f29bd-5da0-40a6-b69c-ba7f4e0324ef,rejected,unassessed,source_review,evaluator_evidence.md#section-4,legacy_review,1,PDF 表单上下文消解原有歧义
+2fe4b718-3bd7-46ec-bdce-b184f5653624,rejected,unassessed,source_review,evaluator_evidence.md#x2,legacy_review,1,评分器按动画时间轴比较并容许帧拆分
+f9584479-3d0d-4c79-affa-9ad7afdd8850,rejected,unassessed,source_review,evaluator_evidence.md#section-4,legacy_review,1,原工作簿结构消解原有歧义
+88fe4b2d-3040-4c70-9a70-546a47764b48,rejected,unassessed,reference_label,annotation_sheet_round2.csv#row-27,legacy_review,1,范围与要求明确且允许多个结果

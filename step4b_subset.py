@@ -8,6 +8,8 @@ import random
 from collections import Counter, defaultdict
 from pathlib import Path
 
+from audit_labels import audit_verdict, exclusion_reason, load_adjudications, read_csv
+
 ROOT = Path(__file__).resolve().parent
 PROFILE = ROOT / "output" / "rule_v2" / "task_profile.csv"
 JSON_BASE = ROOT / "data" / "osworld" / "evaluation_examples" / "examples"
@@ -35,18 +37,6 @@ DOMAIN = {
     "base_setup": "环境配置",
 }
 
-EXCLUDE = {
-    "c7c1e4c3": "A1 已确认：教授邮箱多值未限定 × 全表精确比对",
-    "59155008": "A2 已确认：similar names 多解 × 唯一 URL",
-    "3e3fc409": "A3 已确认：IMDb Top 30 时点/口径未限定 × 固定金标表",
-    "b5062e3e": "A4 已确认：首位作者 affiliation 多单位 × exact_match",
-    "d1acdb87": "A5 已确认：餐馆分店/电话/网站多值 × 唯一取值",
-    "869de13e": "A6 已确认：桌面归类边界无定义 × 固定文件名清单",
-    "42f4d1c7": "B1 已确认：要求写脚本但无脚本检查项",
-    "c82632a4": "B2 候选：要求指定图片 none.png，评分器不比对图片内容",
-    "bf4e9888": "B3 候选：要求 pic1–6 按序，评分器不比对图片身份/顺序",
-}
-
 RUBRIC = {
     "compare_table": "表结构与单元格值比对；先查 config 初始工作簿，再核对 expected 金标表的 sheet/range/rule 类型",
     "compare_pptx_files": "逐选项检查清单；必须查 options 里 examine_* 的开关与 slides.py 源码语义，不得按字面推断",
@@ -58,26 +48,41 @@ RUBRIC = {
 }
 
 
-def read_csv(path: Path) -> list[dict]:
-    with path.open(encoding="utf-8-sig", newline="") as f:
-        return list(csv.DictReader(f))
+def load_reviews():
+    reviewed = {}
+    for sheet, tag in ((SHEET1, "round1"), (SHEET2, "round2")):
+        for row in read_csv(sheet):
+            task_id = row["task_id"]
+            if task_id in reviewed:
+                raise ValueError(f"重复复核样本 task_id：{task_id}")
+            reviewed[task_id] = (tag, row["human_verdict"].strip().upper())
+    return reviewed
+
+
+def build_pool(rows, reviewed, decisions):
+    unknown = decisions.keys() - {row["task_id"] for row in rows}
+    if unknown:
+        raise ValueError(f"裁决表 task_id 不在抽样框：{sorted(unknown)}")
+
+    excluded, pool = [], []
+    for r in rows:
+        tid = r["task_id"]
+        _, reference = reviewed.get(tid, ("", ""))
+        reason = exclusion_reason(int(r["defect_count"] or 0) > 0, reference, decisions.get(tid))
+        if reason:
+            excluded.append((tid, reason))
+        else:
+            pool.append(r)
+    return pool, excluded
 
 
 def main() -> None:
     rows = read_csv(PROFILE)
     assert len(rows) == 368, f"抽样框应为 368 道，实际 {len(rows)}"
 
-    excluded, pool = [], []
-    for r in rows:
-        tid = r["task_id"]
-        hit = next((reason for pre, reason in EXCLUDE.items() if tid.startswith(pre)), None)
-        if hit:
-            excluded.append((tid, hit))
-        elif int(r["defect_count"] or 0) > 0:
-            excluded.append((tid, "v2 规则命中但尚未完成人工复核，暂不纳入"))
-        else:
-            pool.append(r)
-
+    reviewed = load_reviews()
+    decisions = load_adjudications()
+    pool, excluded = build_pool(rows, reviewed, decisions)
     by_domain: dict[str, list[dict]] = defaultdict(list)
     for r in pool:
         dom = DOMAIN.get(r["app"], "其它")
@@ -110,11 +115,6 @@ def main() -> None:
             rem -= 1
 
     rng = random.Random(SEED)
-    reviewed = {}
-    for sh, tag in ((SHEET1, "round1"), (SHEET2, "round2")):
-        for x in read_csv(sh):
-            reviewed[x["task_id"]] = (tag, x["human_verdict"].strip().upper())
-
     json_path = {}
     for f in glob.glob(str(JSON_BASE / "**" / "*.json"), recursive=True):
         try:
@@ -137,7 +137,7 @@ def main() -> None:
     fields = [
         "no", "task_id", "domain_zh", "app", "instruction", "instruction_words",
         "config_steps", "evaluator_func", "risk_tags", "reviewed_round",
-        "reference_verdict", "quality_flag", "rubric_hint", "source_json",
+        "reference_verdict", "audit_verdict", "quality_flag", "rubric_hint", "source_json",
     ]
     OUT_CSV.parent.mkdir(parents=True, exist_ok=True)
     with OUT_CSV.open("w", encoding="utf-8-sig", newline="") as f:
@@ -146,6 +146,7 @@ def main() -> None:
         for r in picked:
             tid = r["task_id"]
             rr, verdict = reviewed.get(tid, ("", ""))
+            effective = audit_verdict(verdict, decisions.get(tid))
             fn = r["evaluator_func"] or ""
             hint = RUBRIC.get(fn, "查 evaluator.func 与 options / expected.rules，按评分器源码确认实际检查项")
             if r["risk_tags"]:
@@ -158,7 +159,8 @@ def main() -> None:
                 "config_steps": r["config_steps"], "evaluator_func": fn,
                 "risk_tags": r["risk_tags"], "reviewed_round": rr,
                 "reference_verdict": verdict,
-                "quality_flag": "reviewed_ok" if rr else "not_reviewed",
+                "audit_verdict": effective,
+                "quality_flag": "reviewed_ok" if effective == "N" else "not_reviewed",
                 "rubric_hint": hint,
                 "source_json": src,
             })
@@ -171,7 +173,8 @@ def main() -> None:
     ex_lines = "\n".join(f"| `{t[:8]}…` | {why} |" for t, why in excluded)
     risk_cnt = Counter(t for r in picked for t in (r["risk_tags"] or "").split(";") if t)
     risk_lines = "\n".join(f"| {k} | {v} |" for k, v in risk_cnt.most_common()) or "| （无） | 0 |"
-    rev_cnt = sum(1 for r in picked if r["task_id"] in reviewed)
+    rev_cnt = sum(audit_verdict(reviewed.get(r["task_id"], ("", ""))[1],
+                                decisions.get(r["task_id"])) == "N" for r in picked)
 
     md = f"""# 领域分层审计子集设计说明（第 4 步 B · 已定稿）
 
@@ -201,10 +204,10 @@ def main() -> None:
 | 分层变量 | `app` → 11 个中文领域（归并 `vs_code→编程开发`、`multi_apps→跨应用协同`） |
 | 配额方法 | 按框内比例分配，最大余数法调整，每层 ≥ 1 |
 
-**排除规则**（两类，均为显式 ID，不靠模糊匹配）：
+**排除规则**按完整 `task_id` 读取 `adjudications.csv` 与原始参考标签。
 
-1. 台账 v1.0 中**已确认或候选的缺陷题**（A1–A6、B1、B2、B3）；
-2. 规则 v2 命中但**尚未完成复核**的题。
+1. 有缺陷记录或经复核仍证据不足的题暂不纳入。
+2. v2 命中且没有复核结论的题暂不纳入。已复核为 `N` 的题可参与抽样。
 
 排除清单：
 
@@ -212,9 +215,7 @@ def main() -> None:
 |---|---|
 {ex_lines}
 
-> 撤销归因后改判 `N` 的题（X1 `46407397`、X2 `2fe4b718`、X4 `15aece23`）
-> 与两条 `U` 消解题（21 `185f29bd`、30 `f9584479`）**不排除**，
-> 因为它们按定稿裁决已不属缺陷；其中被复核过的会在 `reviewed_round` 标记。
+> 第二轮规则误报 `88fe4b2d…` 的 `N` 已生效，对应任务进入抽样池。
 
 ---
 
@@ -245,7 +246,8 @@ def main() -> None:
 | `risk_tags` | 第 1 步扫描出的风险标记（不是缺陷） |
 | `reviewed_round` | 该题是否在 round1 / round2 复核样本中出现 |
 | `reference_verdict` | 两轮**人机协作参考标签**原值（Y/N/U），**非真值** |
-| `quality_flag` | `reviewed_ok`（已复核）/ `not_reviewed`（未复核） |
+| `audit_verdict` | 有裁决时使用裁决，否则沿用参考标签 |
+| `quality_flag` | `reviewed_ok`（所复核问题判 N）/ `not_reviewed`（无复核结论） |
 | `rubric_hint` | 按 `evaluator_func` 生成的验收口径读取提示 |
 | `source_json` | 原始任务 JSON 的**实际**相对路径，供回查 `evaluator.expected` / `config`。注意 OSWorld 把部分跨应用任务放在 `multi_apps/`、`vscode` 对应 `vs_code/`，故路径目录可能与 `app` 字段不同；子集内 {sum(1 for r in picked if r.get('_dir_mismatch'))} 道存在该情况，属原始数据组织方式，不是抽样错误 |
 

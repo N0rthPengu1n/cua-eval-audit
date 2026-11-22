@@ -1,0 +1,92 @@
+{
+  "scope": "offline comparison of PPTX artifacts",
+  "metric": "data/osworld/desktop_env/evaluators/metrics/slides.py",
+  "metric_sha256": "e5885572f4d251e0d772860780a3b826583795b92ad32991e81c3e209687e854",
+  "dependencies": {
+    "python-pptx": "1.0.2",
+    "Pillow": "9.4.0",
+    "lxml": "4.9.3"
+  },
+  "tasks": {
+    "c82632a4-56b6-4db4-9dd1-3820ee3388e4": {
+      "task": "data/osworld/evaluation_examples/examples/libreoffice_impress/c82632a4-56b6-4db4-9dd1-3820ee3388e4.json",
+      "task_sha256": "0f52b4314b524300e93b46c73ab69820bf7dd8fecb3b94ddfc5e23abcd768892",
+      "reference": "data/sample_files/x3_gold.pptx",
+      "counterexample": "data/sample_files/x3_counterexample.pptx",
+      "expected_asset": "https://huggingface.co/datasets/xlangai/ubuntu_osworld_file_cache/resolve/main/libreoffice_impress/c82632a4-56b6-4db4-9dd1-3820ee3388e4/31_2_Gold.pptx",
+      "options": {
+        "examine_shape": false,
+        "examine_image_size": true,
+        "approximately_tolerance": 0.01
+      },
+      "image_slides": [
+        2
+      ],
+      "changed_media": [
+        "ppt/media/image1.png"
+      ],
+      "cases": {
+        "correct": {
+          "artifact_sha256": "89ff6e98b97229b3063a0a2f7cc1a51dd0171da2aa0ce251ddb2c872e0d8618e",
+          "upstream_score": 1,
+          "slide_images_match": true,
+          "repaired_score": 1
+        },
+        "wrong_image_or_order": {
+          "artifact_sha256": "8da852cf496cfbae3b605295b204d453fd6a7b6875f9ba7eb8efa3b43f903d12",
+          "upstream_score": 1,
+          "slide_images_match": false,
+          "repaired_score": 0
+        },
+        "lossless_reencoding": {
+          "artifact_sha256": "eb151f59a632b04b8b9e26f135ea90cc54aec487c43f8bcce35f8df57b972f9c",
+          "upstream_score": 1,
+          "slide_images_match": true,
+          "repaired_score": 1
+        }
+      }
+    },
+    "bf4e9888-f10f-47af-8dba-76413038b73c": {
+      "task": "data/osworld/evaluation_examples/examples/libreoffice_impress/bf4e9888-f10f-47af-8dba-76413038b73c.json",
+      "task_sha256": "559dcee5b82f8a315153abe4a24f4ebc3224a101e3bc0cfa7d7f644aa8d04f5d",
+      "reference": "data/sample_files/x5_gold.pptx",
+      "counterexample": "data/sample_files/x5_counterexample.pptx",
+      "expected_asset": "https://huggingface.co/datasets/xlangai/ubuntu_osworld_file_cache/resolve/main/libreoffice_impress/bf4e9888-f10f-47af-8dba-76413038b73c/4.3-Template_4.29.2016_Gold.pptx",
+      "options": {
+        "examine_shape": false
+      },
+      "image_slides": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "changed_media": [
+        "ppt/media/image1.png",
+        "ppt/media/image2.png"
+      ],
+      "cases": {
+        "correct": {
+          "artifact_sha256": "eef477faec48e2c9067092410d0f3560dccdd7f3509cc0fd5211a330f0ef08cc",
+          "upstream_score": 1,
+          "slide_images_match": true,
+          "repaired_score": 1
+        },
+        "wrong_image_or_order": {
+          "artifact_sha256": "9412025dab98bf1be61943ae409b96aea5c03a51b5f4afac757ba396c9536809",
+          "upstream_score": 1,
+          "slide_images_match": false,
+          "repaired_score": 0
+        },
+        "lossless_reencoding": {
+          "artifact_sha256": "70e02d346e65de9ffc22b76f094b1c8dc824c46c30f3f34bcacdb2e173037b4b",
+          "upstream_score": 1,
+          "slide_images_match": true,
+          "repaired_score": 1
+        }
+      }
+    }
+  }
+}
