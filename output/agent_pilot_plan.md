@@ -29,6 +29,16 @@ agent_outputs/run-01/
 python replay_agent_pilot.py --assets <初始资产与金标缓存目录> score agent_outputs/run-01 output/agent_run_01.json --run-kind agent --run-id run-01 --agent <Agent及版本>
 ```
 
+用 PowerShell 启动 Codex CLI 时，可通过标准输入传入题面，以保留题目中的引号。
+
+```powershell
+Get-Content -LiteralPath (Join-Path $task 'task.txt') -Raw -Encoding UTF8 |
+    codex exec --cd $task --skip-git-repo-check --sandbox workspace-write --json - |
+    Set-Content -LiteralPath (Join-Path $task 'action_log.jsonl') -Encoding utf8
+```
+
+若 Agent 把文件存到更深的目录，先从最终消息确认产物路径，再复制到约定的 `result.xlsx` 或 `result.pptx` 路径。保留原始文件和操作日志。
+
 评分脚本按资产清单校验 SHA-256，保留原评分分支值与产物摘要。约定文件缺失和评分异常各有状态，不并入任务失败数。p10 的本地原型在原评分通过后，根据图片像素尺寸和四边裁切量计算可见图像的宽高比，再与图片框比例比较，当前相对容差取 1%。对 p6 和 p8，保留原评分并逐题复核产物，原型分数留空。几何比较与文档评分均在已有文件上离线运行。
 
 ## 重评分脚本的对照验证

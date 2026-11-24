@@ -2,6 +2,17 @@
 
 本项目审计 OSWorld 公开计算机操作任务的**任务设计与验收逻辑**。重点不是比较模型能力，而是检查一条任务的指令、初始状态和评分器是否相互一致：任务是否存在合理的多种完成方式却只接受一种结果，或题目写明的约束是否没有被评分器验证。
 
+## 从两条真实 Agent 案例开始
+
+首轮试点用 Codex CLI 独立运行五道 Office 任务，再用 OSWorld 原评分函数离线复评最终产物。原评分通过四道，唯一的 0 分在复核中定位到评分器误拒。 [五题复核报告](output/agent_run_01.md) · [逐题分数和产物摘要](output/agent_run_01.json)
+
+| 案例 | 题目要求 | 可复现结果 |
+|---|---|---|
+| **p8 标题样式** | 第 1 页文字加粗，标题为 44 pt 并加下划线 | Agent 完成样式修改后得 0 分。只调整标题框高度，第一份金标分支就从 0 变为 1。[验收工单与复现命令](output/p8_acceptance_ticket.md) |
+| **p10 图片铺满** | 原图等比放大、居中并铺满首页 | Agent 通过居中裁切交付。原评分给 1 分，旧原型给 0 分。使用裁切后的可见图像比例后，该产物通过，拉伸反例仍被拒。[运行与修复记录](output/agent_pilot_plan.md#首次真实运行-p10) |
+
+试点覆盖最终文件评分。表中的分数对应同一批 Agent 产物，可用于判断评分是否对齐题目要求。 [试点题目与验收条件](output/pilot_design.md)
+
 ## 数据来源与使用范围
 
 - **来源**：[xlang-ai/OSWorld](https://github.com/xlang-ai/OSWorld) 公开任务库，采用 Apache-2.0 许可证；许可证文件保留于 `data/osworld/LICENSE`。
@@ -11,7 +22,7 @@
 
 `data/osworld/` 是为复核保留的上游数据与源码快照；项目自身的分析脚本位于根目录，所有生成结果位于 `output/`。
 
-为避免公开可能包含凭据的 Thunderbird 配置，`data/sample_files/x1_profile/` 与 `data/sample_files/thunderbird.profile.tar.gz` 仅保留在本地审计环境中，未纳入公开仓库；其余复现所需的代码、任务数据和审计产物均已包含。
+为避免公开可能包含凭据的 Thunderbird 配置，`data/sample_files/x1_profile/` 与 `data/sample_files/thunderbird.profile.tar.gz` 仅保留在本地审计环境中，未纳入公开仓库。五题运行报告保存产物与操作日志的 SHA-256，p8 演示所需的参考文件可按资产清单下载。 [资产清单](output/pilot_review_assets.json)
 
 ## 审计流程
 
